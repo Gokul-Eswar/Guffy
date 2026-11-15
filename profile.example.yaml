@@ -1,0 +1,63 @@
+# Candidate Profile Example
+personal_info:
+  full_name: "Gokul Eswar"
+  email: "gokul@example.com"
+  phone: "+1 555-0199"
+  location: "San Francisco, CA"
+  linkedin_url: "https://www.linkedin.com/in/gokul-eswar"
+  github_url: "https://github.com/gokul-eswar"
+  portfolio_url: "https://gokul-eswar.dev"
+  resume_path: "data/resumes/resume.pdf"
+
+preferences:
+  target_titles:
+    - "Full Stack Software Engineer"
+    - "Senior Software Engineer"
+    - "Backend Engineer"
+    - "Python Engineer"
+  excluded_titles:
+    - "Intern"
+    - "Data Entry"
+    - "Sales Representative"
+  target_locations:
+    - "Remote"
+    - "United States"
+  remote_only: true
+  min_base_salary_usd: 120000
+  blacklisted_companies:
+    - "ExampleSpamCorp"
+
+skills:
+  languages:
+    - "Python"
+    - "TypeScript"
+    - "JavaScript"
+    - "SQL"
+    - "HTML/CSS"
+  frameworks:
+    - "FastAPI"
+    - "Django"
+    - "React"
+    - "Node.js"
+  cloud_and_tools:
+    - "Docker"
+    - "AWS"
+    - "PostgreSQL"
+    - "Redis"
+    - "Git"
+    - "Linux"
+
+screening_answers:
+  work_authorization: "Yes, I am authorized to work."
+  require_sponsorship: "No, I do not require sponsorship now or in the future."
+  notice_period: "2 weeks"
+  expected_salary: "$130,000"
+  years_of_experience:
+    python: 4
+    fastapi: 3
+    react: 3
+    sql: 4
+    aws: 3
+  custom_qa:
+    "Why do you want to work here?": "I am passionate about high-impact software, scalable architecture, and solving meaningful problems in a collaborative team."
+    "Tell us about a recent project you built": "I architected and built an end-to-end full-stack platform using FastAPI, React, and PostgreSQL with automated CI/CD pipelines."

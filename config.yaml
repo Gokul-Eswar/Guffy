@@ -1,0 +1,24 @@
+# HuntFlow Global Configuration
+app:
+  name: "HuntFlow"
+  version: "0.1.0"
+  database_url: "sqlite:///./data/huntflow.db"
+  screenshots_dir: "./data/screenshots"
+  resumes_dir: "./data/resumes"
+
+search:
+  keywords:
+    - "Software Engineer"
+    - "Full Stack Engineer"
+    - "Python Developer"
+  locations:
+    - "Remote"
+  remote_only: true
+  min_match_score: 75
+  max_jobs_per_source: 30
+
+browser:
+  headless: false
+  user_data_dir: "./.browser_profile"
+  implicit_wait_seconds: 5
+  page_load_timeout_seconds: 30

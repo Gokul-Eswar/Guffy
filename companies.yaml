@@ -1,0 +1,31 @@
+# Target Dream Companies for Direct Career Page Crawling
+companies:
+  - name: "Stripe"
+    domain: "stripe.com"
+    careers_url: "https://stripe.com/jobs"
+    ats: "custom"
+    priority: "high"
+
+  - name: "OpenAI"
+    domain: "openai.com"
+    careers_url: "https://openai.com/careers"
+    ats: "greenhouse"
+    priority: "high"
+
+  - name: "Anthropic"
+    domain: "anthropic.com"
+    careers_url: "https://jobs.lever.co/anthropic"
+    ats: "lever"
+    priority: "high"
+
+  - name: "Datadog"
+    domain: "datadoghq.com"
+    careers_url: "https://careers.datadoghq.com"
+    ats: "greenhouse"
+    priority: "medium"
+
+  - name: "Shopify"
+    domain: "shopify.com"
+    careers_url: "https://www.shopify.com/careers"
+    ats: "smartrecruiters"
+    priority: "medium"
