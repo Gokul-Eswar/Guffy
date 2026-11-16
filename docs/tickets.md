@@ -47,7 +47,7 @@ flowchart TD
 | **Ticket 9** | Portal-Specific Appliers & Staging Engine (HITL) | ✅ Completed | `tests/test_appliers.py` (9 passed) |
 | **Ticket 10** | FastAPI Backend & REST API | ✅ Completed | `tests/test_api.py` (11 passed) |
 | **Ticket 11** | Modern Web Dashboard UI (Tailwind SPA) | ✅ Completed | `tests/test_dashboard.py` (3 passed) |
-| **Ticket 12** | Unified CLI Suite & End-to-End Verification | 📋 Pending | `tests/test_e2e.py` |
+| **Ticket 12** | Unified CLI Suite & End-to-End Verification | ✅ Completed | `tests/test_e2e.py` (7 passed) |
 
 ---
 
@@ -191,8 +191,15 @@ flowchart TD
 
 ---
 
-### 📋 [Ticket 12] Unified CLI Suite & End-to-End Verification
+### ✅ [Ticket 12] Unified CLI Suite & End-to-End Verification
 - **Deliverables**:
-  - `guffy/cli.py` (Commands: `init`, `search`, `crawl-companies`, `match`, `review`, `serve`).
-  - `tests/test_e2e.py`
-  - Complete `README.md`.
+  - `guffy/cli.py`: Unified Rich terminal command-line interface providing commands:
+    - `guffy init`: Workspace, configuration file, and SQLite schema initialization.
+    - `guffy search`: Cross-portal discovery querying with keyword and remote filters.
+    - `guffy crawl-companies`: Targeted ATS crawling across dream organizations.
+    - `guffy match`: Semantic composite fit scoring with summary match highlights table.
+    - `guffy review`: Interactive terminal human-in-the-loop review queue for staged applications.
+    - `guffy status`: Application pipeline conversion metrics and tracked company summary.
+    - `guffy serve`: FastAPI REST API and Tailwind CSS SPA dashboard server launcher.
+  - `tests/test_e2e.py`: 7 comprehensive End-to-End system verification tests covering CLI parser definitions, workspace setup, discovery ingestion, semantic fit scoring, and review queue handling.
+  - `README.md`: Complete documentation covering architectural workflow, features, CLI commands, web dashboard guide, API reference, and installation instructions.
