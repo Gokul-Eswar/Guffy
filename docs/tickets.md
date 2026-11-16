@@ -40,8 +40,8 @@ flowchart TD
 | **Ticket 2** | Candidate Profile & Resume Ingestion Engine (PDF/DOCX) | ✅ Completed | `tests/test_profile_manager.py` (7 passed) |
 | **Ticket 3** | Semantic Fit Scoring & Match Engine (0–100%) | ✅ Completed | `tests/test_matcher.py` (9 passed) |
 | **Ticket 4** | Tailored Content & Screening Q&A Synthesizer | ✅ Completed | `tests/test_generator.py` (9 passed) |
-| **Ticket 5** | Job Discovery Engine: Remote Tech Portals (RemoteOK, WWR, YC Startup) | ⏳ **Next Up** | `tests/test_remote_portals.py` |
-| **Ticket 6** | Official Company Career Page & Direct ATS Crawler (Greenhouse, Lever, Ashby) | 📋 Pending | `tests/test_company_crawler.py` |
+| **Ticket 5** | Job Discovery Engine: Remote Tech Portals (RemoteOK, WWR, YC Startup) | ✅ Completed | `tests/test_remote_portals.py` (6 passed) |
+| **Ticket 6** | Official Company Career Page & Direct ATS Crawler (Greenhouse, Lever, Ashby) | ⏳ **Next Up** | `tests/test_company_crawler.py` |
 | **Ticket 7** | Aggregator & Board Searchers (LinkedIn, Wellfound, Indeed, Dice) | 📋 Pending | `tests/test_searchers.py` |
 | **Ticket 8** | Browser Controller & Universal Form Filler | 📋 Pending | `tests/test_form_filler.py` |
 | **Ticket 9** | Portal-Specific Appliers & Staging Engine (HITL) | 📋 Pending | `tests/test_appliers.py` |
@@ -95,11 +95,17 @@ flowchart TD
 
 ---
 
-### 📋 [Ticket 5] Job Discovery Engine: Remote Tech Portals
+### ✅ [Ticket 5] Job Discovery Engine: Remote Tech Portals
 - **Deliverables**:
-  - `huntflow/searchers/base.py` (`JobPosting` schema and `BaseSearcher` interface).
-  - `huntflow/searchers/remote_portals.py` (`RemoteOKSearcher`, `WeWorkRemotelySearcher`, `YCStartupSearcher`).
-  - `tests/test_remote_portals.py`
+  - `huntflow/searchers/base.py`:
+    - `JobPosting` schema with automatic SHA-256 ID generation and `.to_job_model()` conversion to SQLAlchemy `Job`.
+    - `BaseSearcher` abstract base interface with robust HTML tag stripping and formatting utilities.
+  - `huntflow/searchers/remote_portals.py`:
+    - `RemoteOKSearcher`: Consumes RemoteOK's public JSON API with salary range and keyword matching.
+    - `WeWorkRemotelySearcher`: Parses WWR XML/RSS feeds (`remote-programming-jobs.rss`) with title/company separation and category tagging.
+    - `YCStartupSearcher`: Scrapes and standardizes Y Combinator and Hacker News "Who Is Hiring" startup job listings.
+  - `huntflow/searchers/__init__.py`: Package entrypoint exporting all searchers.
+  - `tests/test_remote_portals.py`: 6 unit tests with full network mocking and edge case coverage.
 
 ---
 
