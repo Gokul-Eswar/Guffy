@@ -1,5 +1,5 @@
 """
-HuntFlow CLI entrypoint
+Guffy CLI entrypoint
 """
 
 import sys
@@ -9,8 +9,8 @@ console = Console()
 
 
 def main():
-    console.print("[bold green]HuntFlow AI Job Agent[/bold green] v0.1.0")
-    console.print("Run [cyan]huntflow --help[/cyan] for available commands.")
+    console.print("[bold green]Guffy AI Job Agent[/bold green] v0.1.0")
+    console.print("Run [cyan]Guffy --help[/cyan] for available commands.")
 
 
 if __name__ == "__main__":

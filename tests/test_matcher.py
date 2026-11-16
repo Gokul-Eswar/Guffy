@@ -5,9 +5,9 @@ Unit Tests for Ticket 3: Semantic Fit Scoring & Match Engine
 import json
 import pytest
 
-from huntflow.core.database import Job
-from huntflow.core.profile_manager import CandidateProfile
-from huntflow.core.matcher import MatchEngine, MatchResult, score_job
+from Guffy.core.database import Job
+from Guffy.core.profile_manager import CandidateProfile
+from Guffy.core.matcher import MatchEngine, MatchResult, score_job
 
 
 @pytest.fixture

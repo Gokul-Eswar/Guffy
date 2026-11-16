@@ -1,7 +1,7 @@
-# HuntFlow: Modular Ticketed Implementation Plan
+# Guffy: Modular Ticketed Implementation Plan
 
 ## Goal Description
-Break down the complete **HuntFlow** architecture into 12 self-contained, sequentially executable, and independently testable tickets. Each ticket delivers a complete functional component with automated unit tests and verification steps before moving to the next.
+Break down the complete **Guffy** architecture into 12 self-contained, sequentially executable, and independently testable tickets. Each ticket delivers a complete functional component with automated unit tests and verification steps before moving to the next.
 
 ---
 
@@ -55,8 +55,8 @@ flowchart TD
   - `[NEW] config.yaml` (Search defaults, match score thresholds, browser settings).
   - `[NEW] profile.example.yaml` (Template for personal info, target titles, salary, screening Q&A).
   - `[NEW] companies.yaml` (Template for target companies and custom career URLs).
-  - `[NEW] huntflow/config.py` (Pydantic settings and YAML configuration loader).
-  - `[NEW] huntflow/core/database.py` (SQLAlchemy models: `Job`, `Company`, `Application`, `ProfileSetting`, and SQLite session manager).
+  - `[NEW] guffy/config.py` (Pydantic settings and YAML configuration loader).
+  - `[NEW] guffy/core/database.py` (SQLAlchemy models: `Job`, `Company`, `Application`, `ProfileSetting`, and SQLite session manager).
   - `[NEW] tests/test_database.py` (Unit tests for DB initialization, CRUD operations, state transitions).
 - **Verification**: Run `pytest tests/test_database.py`.
 
@@ -65,7 +65,7 @@ flowchart TD
 ### [Ticket 2] Candidate Profile & Resume Ingestion Engine
 **Goal**: Parse and extract structured data from user resumes (PDF and DOCX) and validate `profile.yaml`.
 - **Components & Files**:
-  - `[NEW] huntflow/core/profile_manager.py`:
+  - `[NEW] guffy/core/profile_manager.py`:
     - Resume text extractor using `pypdf` and `python-docx`.
     - Skill catalog matcher (extracts programming languages, frameworks, cloud platforms, databases, tools).
     - Profile validator loading personal contact info, target titles, blacklist employers, and screening Q&A dictionary.
@@ -79,7 +79,7 @@ flowchart TD
 ### [Ticket 3] Semantic Fit Scoring & Match Engine (0–100%)
 **Goal**: Implement the multi-stage matching engine that evaluates candidate fit against job requirements.
 - **Components & Files**:
-  - `[NEW] huntflow/core/matcher.py`:
+  - `[NEW] guffy/core/matcher.py`:
     - **Stage 1 (Hard Rule Filters)**: Excludes blacklisted companies, disfavored locations/employment types, and title negative keywords.
     - **Stage 2 (Keyword & Skill Overlap)**: Calculates weighted required vs preferred skill overlap.
     - **Stage 3 (Seniority & Fit Scoring)**: Produces an overall **Fit Score (0–100%)**, list of **Matched Skills**, **Missing Skills**, and **Pros/Cons Rationale**.
@@ -93,7 +93,7 @@ flowchart TD
 ### [Ticket 4] Tailored Content & Screening Q&A Synthesizer
 **Goal**: Generate tailored application materials (cover letters, Wellfound startup pitch notes, and automated screening answers).
 - **Components & Files**:
-  - `[NEW] huntflow/core/generator.py`:
+  - `[NEW] guffy/core/generator.py`:
     - Tailored Cover Letter Generator (aligns candidate's specific background with job requirements).
     - Wellfound Startup Pitch Note Synthesizer (concise 3–4 sentence pitch highlighting high-impact accomplishments).
     - Screening Q&A Resolver (maps answers for work authorization, visa sponsorship, years of experience, notice period, compensation).
@@ -107,8 +107,8 @@ flowchart TD
 ### [Ticket 5] Job Discovery Engine: Remote Tech Portals (RemoteOK, WWR, YC Startup)
 **Goal**: Build the normalized `JobPosting` data model, base searcher interface, and collectors for remote tech portals.
 - **Components & Files**:
-  - `[NEW] huntflow/searchers/base.py` (`JobPosting` model and `BaseSearcher` abstract class).
-  - `[NEW] huntflow/searchers/remote_portals.py`:
+  - `[NEW] guffy/searchers/base.py` (`JobPosting` model and `BaseSearcher` abstract class).
+  - `[NEW] guffy/searchers/remote_portals.py`:
     - `RemoteOKSearcher`: Consumes RemoteOK API for verified remote software and tech jobs.
     - `WeWorkRemotelySearcher`: Parses WWR RSS feeds across Programming, DevOps, and Product.
     - `YCStartupSearcher`: Scrapes Y Combinator Work at a Startup job listings.
@@ -121,7 +121,7 @@ flowchart TD
 ### [Ticket 6] Official Company Career Page & Direct ATS Crawler
 **Goal**: Build the target company manager and ATS crawler for direct career page scraping.
 - **Components & Files**:
-  - `[NEW] huntflow/searchers/company_crawler.py`:
+  - `[NEW] guffy/searchers/company_crawler.py`:
     - Target Company Manager (loads and syncs `companies.yaml` with DB).
     - Career Page URL Discovery (locates `/careers`, `/jobs`, `careers.domain.com`).
     - ATS Signature Detector (identifies Greenhouse, Lever, Ashby, Workday, SmartRecruiters).
@@ -136,10 +136,10 @@ flowchart TD
 ### [Ticket 7] Aggregator & Board Searchers (LinkedIn, Wellfound, Indeed, Dice)
 **Goal**: Implement searchers for major portals.
 - **Components & Files**:
-  - `[NEW] huntflow/searchers/linkedin.py`: LinkedIn search queries with Easy Apply detection.
-  - `[NEW] huntflow/searchers/wellfound.py`: Wellfound startup role discovery.
-  - `[NEW] huntflow/searchers/indeed.py`: Indeed search with quick apply detection.
-  - `[NEW] huntflow/searchers/glassdoor_dice.py`: Dice & Glassdoor search queries.
+  - `[NEW] guffy/searchers/linkedin.py`: LinkedIn search queries with Easy Apply detection.
+  - `[NEW] guffy/searchers/wellfound.py`: Wellfound startup role discovery.
+  - `[NEW] guffy/searchers/indeed.py`: Indeed search with quick apply detection.
+  - `[NEW] guffy/searchers/glassdoor_dice.py`: Dice & Glassdoor search queries.
   - `[NEW] tests/test_searchers.py`:
     - Unit tests for query formatting, HTML response parsing, and error handling.
 - **Verification**: Run `pytest tests/test_searchers.py`.
@@ -149,10 +149,10 @@ flowchart TD
 ### [Ticket 8] Browser Controller & Universal Form Filler
 **Goal**: Build safe, anti-detection Chrome automation with persistent sessions and intelligent form field detection.
 - **Components & Files**:
-  - `[NEW] huntflow/automation/browser.py`:
+  - `[NEW] guffy/automation/browser.py`:
     - Selenium Chrome controller with `--user-data-dir=.browser_profile`.
     - Anti-detection flags (removes `navigator.webdriver`, randomizes delays, natural typing speed).
-  - `[NEW] huntflow/automation/form_filler.py`:
+  - `[NEW] guffy/automation/form_filler.py`:
     - Heuristic field detector matching labels, placeholders, and IDs (First Name, Last Name, Email, Phone, LinkedIn, Resume file input).
     - Dropdown and radio button selector matching user profile values.
   - `[NEW] tests/test_form_filler.py`:
@@ -164,10 +164,10 @@ flowchart TD
 ### [Ticket 9] Portal-Specific Appliers & Staging Engine
 **Goal**: Implement application workflows with Human-in-the-Loop staging.
 - **Components & Files**:
-  - `[NEW] huntflow/automation/linkedin_applier.py` (LinkedIn Easy Apply multi-step modal handler).
-  - `[NEW] huntflow/automation/wellfound_applier.py` (Wellfound apply drawer + custom pitch insertion).
-  - `[NEW] huntflow/automation/indeed_applier.py` (Indeed Quick Apply handler).
-  - `[NEW] huntflow/automation/ats_applier.py` (Greenhouse, Lever, Ashby standard form submission).
+  - `[NEW] guffy/automation/linkedin_applier.py` (LinkedIn Easy Apply multi-step modal handler).
+  - `[NEW] guffy/automation/wellfound_applier.py` (Wellfound apply drawer + custom pitch insertion).
+  - `[NEW] guffy/automation/indeed_applier.py` (Indeed Quick Apply handler).
+  - `[NEW] guffy/automation/ats_applier.py` (Greenhouse, Lever, Ashby standard form submission).
   - Staging Engine: Fills fields, stops before final submit, captures snapshot for user review.
   - `[NEW] tests/test_appliers.py`:
     - Test state machines and step progression logic.
@@ -178,7 +178,7 @@ flowchart TD
 ### [Ticket 10] FastAPI Backend & REST API
 **Goal**: Create high-performance REST API endpoints for job management, search, matching, and application execution.
 - **Components & Files**:
-  - `[NEW] huntflow/web/app.py`:
+  - `[NEW] guffy/web/app.py`:
     - `GET /api/jobs`: List and filter jobs (status, score threshold, portal, company).
     - `POST /api/search`: Trigger multi-portal discovery.
     - `POST /api/crawl-companies`: Trigger target company career crawl.
@@ -197,27 +197,27 @@ flowchart TD
 ### [Ticket 11] Modern Web Dashboard UI (Tailwind SPA)
 **Goal**: Build a responsive, single-page web dashboard served directly by FastAPI.
 - **Components & Files**:
-  - `[NEW] huntflow/web/static/index.html`: Clean, responsive UI with navigation tabs:
+  - `[NEW] guffy/web/static/index.html`: Clean, responsive UI with navigation tabs:
     - **Tab 1: Jobs Discovery**: Search controls, portal filters, match score slider, job cards.
     - **Tab 2: Company Career Monitor**: Manage target dream companies, live status, one-click crawl.
     - **Tab 3: Review & Staging Queue (HITL)**: Side-by-side job description, match breakdown, tailored cover letter/pitch note, pre-filled form preview, and `[Approve & Submit]` button.
     - **Tab 4: Application Tracker**: Applied jobs table, submission timestamps, status badges, confirmation screenshots.
     - **Tab 5: Profile & Settings**: In-browser profile editor, target criteria, screening Q&A.
-  - `[NEW] huntflow/web/static/app.js`: Reactive frontend controller (API calls, state updates, toast alerts, modals).
-- **Verification**: Start server (`uvicorn huntflow.web.app:app`) and verify UI interactions in browser.
+  - `[NEW] guffy/web/static/app.js`: Reactive frontend controller (API calls, state updates, toast alerts, modals).
+- **Verification**: Start server (`uvicorn guffy.web.app:app`) and verify UI interactions in browser.
 
 ---
 
 ### [Ticket 12] Unified CLI Suite & End-to-End Verification
 **Goal**: Provide full CLI commands and verify complete end-to-end user workflows.
 - **Components & Files**:
-  - `[NEW] huntflow/cli.py`: Commands:
-    - `huntflow init`: Setup configuration files and SQLite DB.
-    - `huntflow search [--portals ...] [--keywords ...]`: CLI job search.
-    - `huntflow crawl-companies`: CLI career page crawl.
-    - `huntflow match`: Score newly discovered jobs.
-    - `huntflow review`: Interactive CLI review prompt with rich formatting.
-    - `huntflow serve`: Start Web Dashboard server.
+  - `[NEW] guffy/cli.py`: Commands:
+    - `guffy init`: Setup configuration files and SQLite DB.
+    - `guffy search [--portals ...] [--keywords ...]`: CLI job search.
+    - `guffy crawl-companies`: CLI career page crawl.
+    - `guffy match`: Score newly discovered jobs.
+    - `guffy review`: Interactive CLI review prompt with rich formatting.
+    - `guffy serve`: Start Web Dashboard server.
   - `[NEW] tests/test_e2e.py`:
     - End-to-end workflow test: init -> profile load -> search/crawl -> match score -> stage application -> review.
   - `[NEW] README.md`: Complete setup and user guide.

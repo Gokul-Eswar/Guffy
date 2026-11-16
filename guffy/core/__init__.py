@@ -1,7 +1,7 @@
-from huntflow.core.database import DatabaseManager, Job, Company, Application, ProfileSetting
-from huntflow.core.profile_manager import CandidateProfile, ProfileManager, ResumeParser
-from huntflow.core.matcher import MatchEngine, MatchResult, score_job
-from huntflow.core.generator import (
+from Guffy.core.database import DatabaseManager, Job, Company, Application, ProfileSetting
+from Guffy.core.profile_manager import CandidateProfile, ProfileManager, ResumeParser
+from Guffy.core.matcher import MatchEngine, MatchResult, score_job
+from Guffy.core.generator import (
     CoverLetterGenerator,
     PitchSynthesizer,
     QASynthesizer,

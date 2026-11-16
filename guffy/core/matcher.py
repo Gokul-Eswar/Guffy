@@ -12,7 +12,7 @@ import re
 from typing import Any, Dict, List, Optional, Set, Tuple
 from pydantic import BaseModel, Field
 
-from huntflow.core.profile_manager import (
+from Guffy.core.profile_manager import (
     COMMON_SKILLS_CATALOG,
     CandidateProfile,
     ResumeParser,

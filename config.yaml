@@ -1,8 +1,8 @@
-# HuntFlow Global Configuration
+# Guffy Global Configuration
 app:
-  name: "HuntFlow"
+  name: "Guffy"
   version: "0.1.0"
-  database_url: "sqlite:///./data/huntflow.db"
+  database_url: "sqlite:///./data/guffy.db"
   screenshots_dir: "./data/screenshots"
   resumes_dir: "./data/resumes"
 

@@ -1,5 +1,5 @@
 """
-HuntFlow Configuration Loader and Settings Model
+Guffy Configuration Loader and Settings Model
 """
 
 from pathlib import Path
@@ -9,9 +9,9 @@ from pydantic import BaseModel, Field
 
 
 class AppConfig(BaseModel):
-    name: str = "HuntFlow"
+    name: str = "Guffy"
     version: str = "0.1.0"
-    database_url: str = "sqlite:///./data/huntflow.db"
+    database_url: str = "sqlite:///./data/Guffy.db"
     screenshots_dir: str = "./data/screenshots"
     resumes_dir: str = "./data/resumes"
 

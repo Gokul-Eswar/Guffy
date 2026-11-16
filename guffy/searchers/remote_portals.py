@@ -15,7 +15,7 @@ from typing import Any, Dict, List, Optional
 import xml.etree.ElementTree as ET
 import requests
 
-from huntflow.searchers.base import BaseSearcher, JobPosting
+from Guffy.searchers.base import BaseSearcher, JobPosting
 
 logger = logging.getLogger(__name__)
 

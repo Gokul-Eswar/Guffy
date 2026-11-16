@@ -8,7 +8,7 @@ import pytest
 import docx
 from pypdf import PdfWriter
 
-from huntflow.core.profile_manager import (
+from Guffy.core.profile_manager import (
     CandidateProfile,
     ProfileManager,
     ResumeParser,

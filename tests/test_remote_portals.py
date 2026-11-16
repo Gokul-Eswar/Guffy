@@ -6,9 +6,9 @@ from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 import pytest
 
-from huntflow.core.database import Job
-from huntflow.searchers.base import BaseSearcher, JobPosting
-from huntflow.searchers.remote_portals import (
+from Guffy.core.database import Job
+from Guffy.searchers.base import BaseSearcher, JobPosting
+from Guffy.searchers.remote_portals import (
     RemoteOKSearcher,
     WeWorkRemotelySearcher,
     YCStartupSearcher,

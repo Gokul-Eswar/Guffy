@@ -1,5 +1,5 @@
 """
-HuntFlow Database Models and SQLite Session Manager
+Guffy Database Models and SQLite Session Manager
 """
 
 from datetime import datetime, timezone
@@ -94,7 +94,7 @@ class ProfileSetting(Base):
 
 
 class DatabaseManager:
-    def __init__(self, db_url: str = "sqlite:///./data/huntflow.db"):
+    def __init__(self, db_url: str = "sqlite:///./data/Guffy.db"):
         self.db_url = db_url
         if db_url.startswith("sqlite:///./"):
             rel_path = db_url.replace("sqlite:///./", "")
@@ -124,7 +124,7 @@ class DatabaseManager:
 _db_manager: Optional[DatabaseManager] = None
 
 
-def get_db_manager(db_url: str = "sqlite:///./data/huntflow.db") -> DatabaseManager:
+def get_db_manager(db_url: str = "sqlite:///./data/Guffy.db") -> DatabaseManager:
     global _db_manager
     if _db_manager is None:
         _db_manager = DatabaseManager(db_url)

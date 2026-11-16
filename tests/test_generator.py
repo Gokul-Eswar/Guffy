@@ -5,9 +5,9 @@ Unit Tests for Ticket 4: Tailored Content & Screening Q&A Synthesizer
 import json
 import pytest
 
-from huntflow.core.database import Job, Application
-from huntflow.core.profile_manager import CandidateProfile
-from huntflow.core.generator import (
+from Guffy.core.database import Job, Application
+from Guffy.core.profile_manager import CandidateProfile
+from Guffy.core.generator import (
     CoverLetterGenerator,
     PitchSynthesizer,
     QASynthesizer,

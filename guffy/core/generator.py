@@ -17,9 +17,9 @@ import json
 import re
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from huntflow.core.database import Application, Job
-from huntflow.core.matcher import MatchEngine, MatchResult
-from huntflow.core.profile_manager import CandidateProfile
+from Guffy.core.database import Application, Job
+from Guffy.core.matcher import MatchEngine, MatchResult
+from Guffy.core.profile_manager import CandidateProfile
 
 
 class CoverLetterGenerator:
@@ -179,6 +179,10 @@ class QASynthesizer:
 
     def __init__(self, profile: CandidateProfile):
         self.profile = profile
+
+    def resolve_question(self, question: str, default: Optional[str] = None) -> str:
+        """Alias for answer_question."""
+        return self.answer_question(question, default=default)
 
     def answer_question(self, question: str, default: Optional[str] = None) -> str:
         """

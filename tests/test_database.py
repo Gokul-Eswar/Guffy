@@ -7,13 +7,13 @@ from pathlib import Path
 import pytest
 from sqlalchemy.orm import Session
 
-from huntflow.config import Settings, get_settings
-from huntflow.core.database import DatabaseManager, Job, Company, Application, ProfileSetting
+from Guffy.config import Settings, get_settings
+from Guffy.core.database import DatabaseManager, Job, Company, Application, ProfileSetting
 
 
 @pytest.fixture
 def test_db_manager(tmp_path: Path):
-    test_db_file = tmp_path / "test_huntflow.db"
+    test_db_file = tmp_path / "test_Guffy.db"
     db_url = f"sqlite:///{test_db_file}"
     db = DatabaseManager(db_url)
     db.init_db()
@@ -22,7 +22,7 @@ def test_db_manager(tmp_path: Path):
 
 def test_load_default_settings():
     settings = Settings.load_from_yaml("config.yaml")
-    assert settings.app.name == "HuntFlow"
+    assert settings.app.name == "Guffy"
     assert "Software Engineer" in settings.search.keywords
     assert settings.search.remote_only is True
     assert settings.search.min_match_score == 75

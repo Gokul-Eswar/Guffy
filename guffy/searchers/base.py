@@ -10,7 +10,7 @@ import re
 from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
-from huntflow.core.database import Job
+from Guffy.core.database import Job
 
 
 class JobPosting(BaseModel):
