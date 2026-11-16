@@ -28,7 +28,7 @@ from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-from Guffy.config import BrowserConfig, Settings
+from guffy.config import BrowserConfig, Settings
 
 logger = logging.getLogger(__name__)
 

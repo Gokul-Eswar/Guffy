@@ -44,8 +44,8 @@ flowchart TD
 | **Ticket 6** | Official Company Career Page & Direct ATS Crawler (Greenhouse, Lever, Ashby) | ✅ Completed | `tests/test_company_crawler.py` (7 passed) |
 | **Ticket 7** | Aggregator & Board Searchers (LinkedIn, Wellfound, Indeed, Dice) | ✅ Completed | `tests/test_searchers.py` (9 passed) |
 | **Ticket 8** | Browser Controller & Universal Form Filler | ✅ Completed | `tests/test_form_filler.py` (4 passed) |
-| **Ticket 9** | Portal-Specific Appliers & Staging Engine (HITL) | ⏳ **Next Up** | `tests/test_appliers.py` |
-| **Ticket 10** | FastAPI Backend & REST API | 📋 Pending | `tests/test_api.py` |
+| **Ticket 9** | Portal-Specific Appliers & Staging Engine (HITL) | ✅ Completed | `tests/test_appliers.py` (9 passed) |
+| **Ticket 10** | FastAPI Backend & REST API | ⏳ **Next Up** | `tests/test_api.py` |
 | **Ticket 11** | Modern Web Dashboard UI (Tailwind SPA) | 📋 Pending | Manual / Browser |
 | **Ticket 12** | Unified CLI Suite & End-to-End Verification | 📋 Pending | `tests/test_e2e.py` |
 
@@ -151,11 +151,15 @@ flowchart TD
 
 ---
 
-### 📋 [Ticket 9] Portal-Specific Appliers & Staging Engine
+### ✅ [Ticket 9] Portal-Specific Appliers & Staging Engine
 - **Deliverables**:
-  - `guffy/automation/linkedin_applier.py`, `wellfound_applier.py`, `indeed_applier.py`, `ats_applier.py`.
-  - Staging Engine with human-in-the-loop review snapshots.
-  - `tests/test_appliers.py`
+  - `guffy/automation/ats_applier.py`: Direct ATS applier (Greenhouse, Lever, Ashby, Workday).
+  - `guffy/automation/linkedin_applier.py`: LinkedIn Easy Apply multi-step modal applier with step progression and safety review halts.
+  - `guffy/automation/wellfound_applier.py`: Wellfound apply drawer with custom startup pitch note insertion.
+  - `guffy/automation/indeed_applier.py`: Indeed Quick Apply wizard handler.
+  - `guffy/automation/staging_engine.py`: `ApplicationStagingEngine` orchestrating form filling, screenshot review snapshots, database staging, and 1-click human-in-the-loop submission approval.
+  - `guffy/automation/__init__.py`: Package export updates.
+  - `tests/test_appliers.py`: 9 comprehensive unit tests verifying staging, submit triggers, and state transitions.
 
 ---
 

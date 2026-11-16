@@ -25,9 +25,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.ui import Select
 
-from Guffy.automation.browser import BrowserController
-from Guffy.core.generator import QASynthesizer
-from Guffy.core.profile_manager import CandidateProfile
+from guffy.automation.browser import BrowserController
+from guffy.core.generator import QASynthesizer
+from guffy.core.profile_manager import CandidateProfile
 
 logger = logging.getLogger(__name__)
 

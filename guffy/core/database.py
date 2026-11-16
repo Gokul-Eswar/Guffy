@@ -107,7 +107,7 @@ class DatabaseManager:
             db_url,
             connect_args={"check_same_thread": False} if "sqlite" in db_url else {},
         )
-        self.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
+        self.SessionLocal = sessionmaker(autocommit=False, autoflush=False, expire_on_commit=False, bind=self.engine)
 
     def init_db(self) -> None:
         """Create all database tables."""
