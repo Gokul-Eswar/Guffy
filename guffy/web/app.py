@@ -31,6 +31,8 @@ from fastapi import (
     status,
 )
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 import yaml
@@ -634,3 +636,21 @@ def get_analytics(db: Session = Depends(get_db)):
         "portal_distribution": portal_counts,
         "tracked_companies_count": db.query(Company).count(),
     }
+
+
+# ---------------------------------------------------------------------------
+# Static SPA Mount & Root Route (Ticket 11)
+# ---------------------------------------------------------------------------
+static_dir = Path(__file__).parent / "static"
+if static_dir.exists():
+    app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+
+
+@app.get("/", include_in_schema=False)
+def serve_dashboard():
+    """Serves the Tailwind SPA dashboard single-page application."""
+    index_file = static_dir / "index.html"
+    if index_file.exists():
+        return FileResponse(str(index_file))
+    return {"message": "Guffy Dashboard UI (index.html not found). API is active."}
+

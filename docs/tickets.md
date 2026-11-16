@@ -46,7 +46,7 @@ flowchart TD
 | **Ticket 8** | Browser Controller & Universal Form Filler | ✅ Completed | `tests/test_form_filler.py` (4 passed) |
 | **Ticket 9** | Portal-Specific Appliers & Staging Engine (HITL) | ✅ Completed | `tests/test_appliers.py` (9 passed) |
 | **Ticket 10** | FastAPI Backend & REST API | ✅ Completed | `tests/test_api.py` (11 passed) |
-| **Ticket 11** | Modern Web Dashboard UI (Tailwind SPA) | ⏳ **Next Up** | Manual / Browser |
+| **Ticket 11** | Modern Web Dashboard UI (Tailwind SPA) | ✅ Completed | `tests/test_dashboard.py` (3 passed) |
 | **Ticket 12** | Unified CLI Suite & End-to-End Verification | 📋 Pending | `tests/test_e2e.py` |
 
 ---
@@ -182,9 +182,12 @@ flowchart TD
 
 ---
 
-### 📋 [Ticket 11] Modern Web Dashboard UI (Tailwind SPA)
+### ✅ [Ticket 11] Modern Web Dashboard UI (Tailwind SPA)
 - **Deliverables**:
-  - `guffy/web/static/index.html` & `app.js`: Interactive UI for discovery, staging review queue, application tracker, company monitor.
+  - `guffy/web/static/index.html`: Responsive Tailwind CSS Single-Page Application dashboard with dark mode UI, multi-tab layout, filter toolbar, HITL review queue cards, company management modal, profile/screening configurator, and analytics conversion funnel.
+  - `guffy/web/static/app.js`: Client-side single-page application engine featuring real-time state management, API health monitoring, debounced filtering, human-in-the-loop 1-click submit workflows, resume file upload handler, and modal controllers.
+  - `guffy/web/app.py`: Static files mount at `/static` and root dashboard serving route (`GET /`).
+  - `tests/test_dashboard.py`: Verification tests for UI asset presence, layout structures, and JS interaction hooks (3 passed).
 
 ---
 
