@@ -45,8 +45,8 @@ flowchart TD
 | **Ticket 7** | Aggregator & Board Searchers (LinkedIn, Wellfound, Indeed, Dice) | ✅ Completed | `tests/test_searchers.py` (9 passed) |
 | **Ticket 8** | Browser Controller & Universal Form Filler | ✅ Completed | `tests/test_form_filler.py` (4 passed) |
 | **Ticket 9** | Portal-Specific Appliers & Staging Engine (HITL) | ✅ Completed | `tests/test_appliers.py` (9 passed) |
-| **Ticket 10** | FastAPI Backend & REST API | ⏳ **Next Up** | `tests/test_api.py` |
-| **Ticket 11** | Modern Web Dashboard UI (Tailwind SPA) | 📋 Pending | Manual / Browser |
+| **Ticket 10** | FastAPI Backend & REST API | ✅ Completed | `tests/test_api.py` (11 passed) |
+| **Ticket 11** | Modern Web Dashboard UI (Tailwind SPA) | ⏳ **Next Up** | Manual / Browser |
 | **Ticket 12** | Unified CLI Suite & End-to-End Verification | 📋 Pending | `tests/test_e2e.py` |
 
 ---
@@ -163,10 +163,22 @@ flowchart TD
 
 ---
 
-### 📋 [Ticket 10] FastAPI Backend & REST API
+### ✅ [Ticket 10] FastAPI Backend & REST API
 - **Deliverables**:
-  - `guffy/web/app.py`: `/api/jobs`, `/api/search`, `/api/match`, `/api/stage/{id}`, `/api/approve/{id}`, `/api/profile`, `/api/companies`, `/api/analytics`.
-  - `tests/test_api.py`
+  - `guffy/web/app.py`: High-performance FastAPI REST API endpoints:
+    - `GET /api/jobs`: List and filter discovered jobs (by status, portal, company, min match score, pagination).
+    - `GET /api/jobs/{id}`: Deep inspection of single job posting with linked staged application metadata.
+    - `POST /api/search`: Multi-portal discovery trigger across 8 job portals (RemoteOK, WWR, YC, LinkedIn, Wellfound, Indeed, Dice, Glassdoor) with sync or background task modes.
+    - `POST /api/crawl-companies`: Trigger target company career crawler across Greenhouse, Lever, Ashby, and bespoke career sites.
+    - `POST /api/match`: Semantic fit match trigger scoring newly discovered or filtered jobs.
+    - `POST /api/stage/{id}`: Human-in-the-Loop staging trigger invoking form autofill and screenshot capture without final submission.
+    - `POST /api/approve/{id}`: 1-click execution for user-approved applications.
+    - `GET /api/profile` & `PUT /api/profile`: Candidate profile inspection and YAML updates.
+    - `POST /api/profile/resume`: Resume file ingestion (`.pdf`, `.docx`, `.txt`) with automated skill parsing and profile updates.
+    - `GET /api/companies`, `POST /api/companies`, `DELETE /api/companies/{id}`: Target dream company tracking management.
+    - `GET /api/analytics`: Application pipeline conversion funnel and portal distribution metrics.
+  - `guffy/web/__init__.py`: Package export exposing FastAPI `app`.
+  - `tests/test_api.py`: 11 comprehensive integration and unit tests covering all endpoints.
 
 ---
 
