@@ -420,6 +420,34 @@ def cmd_status(args: argparse.Namespace):
         session.close()
 
 
+def cmd_scheduler(args):
+    """Run the 15-minute background scheduler loop or check due jobs once."""
+    from guffy.core.scheduler import GuffySchedulerService, ScheduleManager
+
+    mgr = ScheduleManager()
+    service = GuffySchedulerService(manager=mgr, check_interval_seconds=args.interval)
+
+    if args.run_once:
+        console.print("[cyan]Checking and executing due jobs once...[/cyan]")
+        results = service.run_due_jobs_once()
+        console.print(f"[green]Completed. Processed {len(results)} due job(s).[/green]")
+        for r in results:
+            console.print(f" - Job {r.get('job_id')}: [bold]{r.get('status')}[/bold]")
+        return
+
+    console.print(f"[bold green]Starting Guffy Background Scheduler[/bold green] (checking every {args.interval // 60}m)...")
+    console.print("[dim]Press Ctrl+C to stop.[/dim]")
+    service.start()
+    try:
+        while True:
+            import time
+            time.sleep(1)
+    except KeyboardInterrupt:
+        console.print("\n[yellow]Stopping scheduler...[/yellow]")
+        service.stop()
+        console.print("[green]Scheduler stopped cleanly.[/green]")
+
+
 # ---------------------------------------------------------------------------
 # Parser Entrypoint
 # ---------------------------------------------------------------------------
@@ -470,6 +498,12 @@ def build_parser() -> argparse.ArgumentParser:
     # status
     p_status = subparsers.add_parser("status", help="Show pipeline statistics and metrics")
     p_status.set_defaults(func=cmd_status)
+
+    # scheduler
+    p_sched = subparsers.add_parser("scheduler", help="Run background scheduler loop checking every 15 min")
+    p_sched.add_argument("--interval", type=int, default=900, help="Check interval in seconds (default 900 / 15m)")
+    p_sched.add_argument("--run-once", action="store_true", help="Execute any currently due jobs once and exit")
+    p_sched.set_defaults(func=cmd_scheduler)
 
     return parser
 

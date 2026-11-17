@@ -16,6 +16,7 @@ resumes/
 data/*.db
 data/*.sqlite
 data/*.sqlite3
+data/schedules.json
 *.db
 *.sqlite
 *.sqlite3

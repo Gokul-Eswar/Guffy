@@ -67,6 +67,8 @@ from guffy.searchers import (
     YCStartupSearcher,
 )
 
+from guffy.core.scheduler import ScheduleManager, ScheduledJob, get_scheduler_service
+
 logger = logging.getLogger(__name__)
 
 app = FastAPI(
@@ -74,6 +76,22 @@ app = FastAPI(
     version="0.1.0",
     description="Intelligent Multi-Portal Job Search & Tailored Application Engine",
 )
+
+@app.on_event("startup")
+def startup_event():
+    """Starts the optional background scheduler on web startup if enabled."""
+    mgr = ScheduleManager()
+    data = mgr.load_data()
+    if data.get("settings", {}).get("scheduler_enabled", True):
+        service = get_scheduler_service()
+        service.start()
+
+
+@app.on_event("shutdown")
+def shutdown_event():
+    """Stops the scheduler when FastAPI shuts down."""
+    service = get_scheduler_service()
+    service.stop()
 
 app.add_middleware(
     CORSMiddleware,
@@ -636,6 +654,64 @@ def get_analytics(db: Session = Depends(get_db)):
         "portal_distribution": portal_counts,
         "tracked_companies_count": db.query(Company).count(),
     }
+
+
+# ---------------------------------------------------------------------------
+# Scheduler & Notification Endpoints
+# ---------------------------------------------------------------------------
+
+@app.get("/api/scheduler", tags=["Scheduler"])
+def get_scheduler_status():
+    """Returns scheduler configuration, jobs, and running status."""
+    service = get_scheduler_service()
+    mgr = service.manager
+    data = mgr.load_data()
+    return {
+        "is_running": service.is_running(),
+        "settings": data.get("settings", {}),
+        "jobs": data.get("jobs", []),
+        "run_history": data.get("run_history", [])[:10],
+    }
+
+
+@app.post("/api/scheduler/toggle", tags=["Scheduler"])
+def toggle_scheduler(enable: bool = Query(...)):
+    """Enables or disables the background scheduler."""
+    service = get_scheduler_service()
+    mgr = service.manager
+    data = mgr.load_data()
+    data.setdefault("settings", {})["scheduler_enabled"] = enable
+    mgr.save_data(data)
+
+    if enable and not service.is_running():
+        service.start()
+    elif not enable and service.is_running():
+        service.stop()
+
+    return {"is_running": service.is_running(), "scheduler_enabled": enable}
+
+
+@app.post("/api/scheduler/run-now", tags=["Scheduler"])
+def run_scheduler_now(background_tasks: BackgroundTasks):
+    """Triggers an immediate scan for due jobs."""
+    service = get_scheduler_service()
+    background_tasks.add_task(service.run_due_jobs_once)
+    return {"message": "Scheduled scan triggered in background"}
+
+
+@app.get("/api/notifications", tags=["Notifications"])
+def get_notifications(unread_only: bool = Query(False)):
+    """Retrieves web dashboard alerts (e.g. for high-match jobs)."""
+    mgr = ScheduleManager()
+    return {"notifications": mgr.get_notifications(unread_only=unread_only)}
+
+
+@app.post("/api/notifications/mark-read", tags=["Notifications"])
+def mark_notifications_read(notification_id: Optional[str] = Query(None)):
+    """Marks one or all notifications as read."""
+    mgr = ScheduleManager()
+    mgr.mark_notifications_read(notif_id=notification_id)
+    return {"status": "success"}
 
 
 # ---------------------------------------------------------------------------
