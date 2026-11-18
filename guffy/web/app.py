@@ -86,6 +86,8 @@ app = FastAPI(
 @app.on_event("startup")
 def startup_event():
     """Starts the optional background scheduler on web startup if enabled."""
+    if os.environ.get("TESTING") == "1":
+        return
     mgr = ScheduleManager()
     data = mgr.load_data()
     if data.get("settings", {}).get("scheduler_enabled", True):
@@ -96,6 +98,8 @@ def startup_event():
 @app.on_event("shutdown")
 def shutdown_event():
     """Stops the scheduler when FastAPI shuts down."""
+    if os.environ.get("TESTING") == "1":
+        return
     service = get_scheduler_service()
     service.stop()
 
@@ -275,8 +279,42 @@ def get_jobs(
         except Exception:
             pros_cons = {}
 
+        # Outlets and recommendation
+        outlets_data = []
+        if j.outlets:
+            for o in j.outlets:
+                badge = get_outlet_badge_and_label(o.portal, o.directness_score)
+                outlets_data.append({
+                    "id": o.id,
+                    "portal": o.portal,
+                    "job_url": o.job_url,
+                    "easy_apply": o.easy_apply,
+                    "directness_score": o.directness_score,
+                    "tier": badge["tier"],
+                    "label": badge["label"],
+                    "rationale": badge["rationale"],
+                })
+        else:
+            primary_score = get_outlet_directness_score(j.portal, j.easy_apply)
+            badge = get_outlet_badge_and_label(j.portal, primary_score)
+            outlets_data.append({
+                "id": None,
+                "portal": j.portal,
+                "job_url": j.job_url,
+                "easy_apply": j.easy_apply,
+                "directness_score": primary_score,
+                "tier": badge["tier"],
+                "label": badge["label"],
+                "rationale": badge["rationale"],
+            })
+
+        # Sort outlets descending by directness score
+        outlets_data.sort(key=lambda x: x["directness_score"], reverse=True)
+        recommended_outlet = outlets_data[0] if outlets_data else None
+
         items.append({
             "id": j.id,
+            "canonical_id": j.canonical_id,
             "title": j.title,
             "company": j.company,
             "location": j.location,
@@ -291,6 +329,9 @@ def get_jobs(
             "missing_skills": missing,
             "pros_cons": pros_cons,
             "status": j.status,
+            "outlets": outlets_data,
+            "outlets_count": len(outlets_data),
+            "recommended_outlet": recommended_outlet,
             "discovered_at": j.discovered_at.isoformat() if j.discovered_at else None,
             "updated_at": j.updated_at.isoformat() if j.updated_at else None,
         })
@@ -341,6 +382,26 @@ def get_job_detail(job_id: str, db: Session = Depends(get_db)):
         "missing_skills": json.loads(job.missing_skills) if job.missing_skills and job.missing_skills.startswith("[") else [],
         "pros_cons": json.loads(job.pros_cons) if job.pros_cons else {},
         "status": job.status,
+        "outlets": [
+            {
+                "id": o.id,
+                "portal": o.portal,
+                "job_url": o.job_url,
+                "easy_apply": o.easy_apply,
+                "directness_score": o.directness_score,
+                **get_outlet_badge_and_label(o.portal, o.directness_score),
+            }
+            for o in job.outlets
+        ] if job.outlets else [
+            {
+                "id": None,
+                "portal": job.portal,
+                "job_url": job.job_url,
+                "easy_apply": job.easy_apply,
+                "directness_score": get_outlet_directness_score(job.portal, job.easy_apply),
+                **get_outlet_badge_and_label(job.portal, get_outlet_directness_score(job.portal, job.easy_apply)),
+            }
+        ],
         "discovered_at": job.discovered_at.isoformat() if job.discovered_at else None,
         "application": application_data,
     }

@@ -143,3 +143,62 @@ def test_save_or_link_posting_workflow(tmp_path):
     finally:
         session.close()
 
+
+def test_api_jobs_includes_outlets(tmp_path):
+    from starlette.testclient import TestClient
+    from guffy.web.app import app, get_db
+    from guffy.core.database import Base, create_engine, sessionmaker
+    from unittest.mock import patch
+
+    db_path = tmp_path / "test_api_dedup.db"
+    engine = create_engine(f"sqlite:///{db_path}")
+    Base.metadata.create_all(bind=engine)
+    TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+    def override_get_db():
+        db = TestingSessionLocal()
+        try:
+            yield db
+        finally:
+            db.close()
+
+    app.dependency_overrides[get_db] = override_get_db
+
+    session = TestingSessionLocal()
+    try:
+        from guffy.searchers.base import save_or_link_posting
+        p1 = JobPosting(
+            title="Senior Platform Engineer",
+            company="Airbnb, Inc.",
+            job_url="https://remoteok.com/j/airbnb-1",
+            portal="remoteok",
+        )
+        p2 = JobPosting(
+            title="Senior Platform Engineer [Remote]",
+            company="Airbnb",
+            job_url="https://careers.airbnb.com/positions/999",
+            portal="company_ats",
+        )
+        save_or_link_posting(session, p1)
+        save_or_link_posting(session, p2)
+        session.commit()
+    finally:
+        session.close()
+
+    with patch("guffy.web.app.get_scheduler_service") as mock_sched:
+        mock_sched.return_value.start = lambda: None
+        mock_sched.return_value.stop = lambda: None
+        client = TestClient(app, raise_server_exceptions=True)
+        response = client.get("/api/jobs")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["total"] == 1  # Deduplicated into 1 canonical job
+        job_item = data["jobs"][0]
+        assert job_item["company"] == "Airbnb, Inc."
+        assert job_item["outlets_count"] == 2
+        assert job_item["recommended_outlet"]["portal"] == "company_ats"
+        assert job_item["recommended_outlet"]["directness_score"] == 100
+        assert "Direct to Recruiter" in job_item["recommended_outlet"]["label"]
+    app.dependency_overrides.clear()
+
+
