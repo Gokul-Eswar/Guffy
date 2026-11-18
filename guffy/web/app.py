@@ -66,6 +66,12 @@ from guffy.searchers import (
     WellfoundSearcher,
     YCStartupSearcher,
 )
+from guffy.searchers.base import (
+    JobPosting,
+    get_outlet_badge_and_label,
+    get_outlet_directness_score,
+    save_or_link_posting,
+)
 
 from guffy.core.scheduler import ScheduleManager, ScheduledJob, get_scheduler_service
 
@@ -205,12 +211,7 @@ def run_job_search_task(
                             limit=max_results,
                         )
                         for posting in results:
-                            existing = session.query(Job).filter_by(id=posting.id).first()
-                            if not existing:
-                                existing_url = session.query(Job).filter_by(job_url=posting.job_url).first()
-                                if not existing_url:
-                                    job_model = posting.to_job_model()
-                                    session.add(job_model)
+                            save_or_link_posting(session, posting)
                         session.commit()
                     except Exception as e:
                         logger.error(f"Error searching {p_name} for {kw}: {e}")

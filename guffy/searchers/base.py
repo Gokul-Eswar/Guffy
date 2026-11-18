@@ -11,6 +11,103 @@ from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
 from Guffy.core.database import Job, JobOutlet
+from sqlalchemy.orm import Session
+
+
+def save_or_link_posting(session: Session, posting: "JobPosting") -> Dict[str, Any]:
+    """
+    Ingests a JobPosting with cross-source deduplication:
+    - If job URL exists, skips duplicate.
+    - If canonical_id matches an existing primary Job:
+        - If incoming posting has a strictly higher directness score (e.g. ATS vs Aggregator),
+          promotes the new posting to primary or updates primary attributes and archives existing as outlet.
+        - Otherwise, registers the new posting as a JobOutlet under the existing primary Job.
+    - If no match, creates and inserts a new primary Job record along with its initial JobOutlet.
+    Returns: {"created": bool, "linked_outlet": bool, "job": Job}
+    """
+    # 1. Exact URL duplicate check
+    existing_url = session.query(Job).filter_by(job_url=posting.job_url).first()
+    if existing_url:
+        return {"created": False, "linked_outlet": False, "job": existing_url}
+
+    existing_outlet_url = session.query(JobOutlet).filter_by(job_url=posting.job_url).first()
+    if existing_outlet_url:
+        parent_job = session.query(Job).filter_by(id=existing_outlet_url.job_id).first()
+        return {"created": False, "linked_outlet": False, "job": parent_job}
+
+    directness = get_outlet_directness_score(posting.portal, posting.easy_apply)
+
+    # 2. Canonical match check
+    canonical_primary = (
+        session.query(Job)
+        .filter_by(canonical_id=posting.canonical_id, is_canonical_primary=True)
+        .first()
+    )
+
+    if canonical_primary:
+        primary_directness = get_outlet_directness_score(
+            canonical_primary.portal, canonical_primary.easy_apply
+        )
+
+        # If incoming source is more direct than current primary, upgrade primary attributes
+        if directness > primary_directness:
+            # Demote old primary info into an outlet if not already there
+            old_outlet = (
+                session.query(JobOutlet)
+                .filter_by(job_id=canonical_primary.id, portal=canonical_primary.portal.lower())
+                .first()
+            )
+            if not old_outlet:
+                session.add(
+                    JobOutlet(
+                        job_id=canonical_primary.id,
+                        portal=canonical_primary.portal.lower(),
+                        job_url=canonical_primary.job_url,
+                        easy_apply=canonical_primary.easy_apply,
+                        directness_score=primary_directness,
+                    )
+                )
+            canonical_primary.portal = posting.portal.lower()
+            canonical_primary.job_url = posting.job_url
+            canonical_primary.easy_apply = posting.easy_apply
+            if posting.description and len(posting.description) > len(canonical_primary.description or ""):
+                canonical_primary.description = posting.description
+
+        # Check if incoming posting's portal is already in outlets
+        existing_portal_outlet = (
+            session.query(JobOutlet)
+            .filter_by(job_id=canonical_primary.id, portal=posting.portal.lower())
+            .first()
+        )
+        if not existing_portal_outlet:
+            outlet = JobOutlet(
+                job_id=canonical_primary.id,
+                portal=posting.portal.lower(),
+                job_url=posting.job_url,
+                easy_apply=posting.easy_apply,
+                directness_score=directness,
+            )
+            session.add(outlet)
+
+        session.flush()
+        session.refresh(canonical_primary)
+        return {"created": False, "linked_outlet": True, "job": canonical_primary}
+
+    # 3. New unique Job
+    new_job = posting.to_job_model()
+    session.add(new_job)
+    # Also attach the primary outlet
+    outlet = JobOutlet(
+        job_id=new_job.id,
+        portal=posting.portal.lower(),
+        job_url=posting.job_url,
+        easy_apply=posting.easy_apply,
+        directness_score=directness,
+    )
+    session.add(outlet)
+    session.flush()
+    session.refresh(new_job)
+    return {"created": True, "linked_outlet": False, "job": new_job}
 
 
 def normalize_company(company: str) -> str:

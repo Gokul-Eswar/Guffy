@@ -29,9 +29,10 @@ from rich.table import Table
 from guffy.automation.browser import BrowserController
 from guffy.automation.staging_engine import ApplicationStagingEngine
 from guffy.config import Settings, get_settings
-from guffy.core.database import Application, Company, DatabaseManager, Job, get_db_manager
+from guffy.core.database import Application, Company, DatabaseManager, Job, JobOutlet, get_db_manager
 from guffy.core.matcher import MatchEngine, score_job
 from guffy.core.profile_manager import CandidateProfile, ProfileManager, ResumeParser
+from guffy.searchers.base import save_or_link_posting
 from guffy.searchers import (
     CompanyCrawler,
     DiceSearcher,
@@ -168,12 +169,9 @@ def cmd_search(args: argparse.Namespace):
                         )
                         for posting in results:
                             total_discovered += 1
-                            existing = session.query(Job).filter_by(id=posting.id).first()
-                            if not existing:
-                                existing_url = session.query(Job).filter_by(job_url=posting.job_url).first()
-                                if not existing_url:
-                                    session.add(posting.to_job_model())
-                                    new_jobs_count += 1
+                            res = save_or_link_posting(session, posting)
+                            if res["created"]:
+                                new_jobs_count += 1
                         session.commit()
                     except Exception as e:
                         console.print(f"[yellow]Warning searching {p_name} for '{kw}': {e}[/yellow]")

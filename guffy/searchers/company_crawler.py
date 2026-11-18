@@ -24,7 +24,7 @@ import requests
 from sqlalchemy.orm import Session
 
 from Guffy.core.database import Company, Job
-from Guffy.searchers.base import BaseSearcher, JobPosting
+from Guffy.searchers.base import BaseSearcher, JobPosting, save_or_link_posting
 
 logger = logging.getLogger(__name__)
 
@@ -674,11 +674,8 @@ class CompanyCrawler(BaseSearcher):
                 postings = filtered
 
             for p in postings:
-                # Deduplicate against database
-                existing = session.query(Job).filter(Job.job_url == p.job_url).first()
-                if not existing:
-                    job_model = p.to_job_model()
-                    session.add(job_model)
+                # Deduplicate and link outlets against database
+                save_or_link_posting(session, p)
                 all_postings.append(p)
 
         session.commit()
