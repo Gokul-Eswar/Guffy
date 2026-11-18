@@ -1,4 +1,4 @@
-from Guffy.core.database import DatabaseManager, Job, Company, Application, ProfileSetting
+from Guffy.core.database import DatabaseManager, Job, JobOutlet, Company, Application, ProfileSetting
 from Guffy.core.profile_manager import CandidateProfile, ProfileManager, ResumeParser
 from Guffy.core.matcher import MatchEngine, MatchResult, score_job
 from Guffy.core.generator import (
@@ -11,6 +11,7 @@ from Guffy.core.generator import (
 __all__ = [
     "DatabaseManager",
     "Job",
+    "JobOutlet",
     "Company",
     "Application",
     "ProfileSetting",

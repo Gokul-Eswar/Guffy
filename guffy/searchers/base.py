@@ -10,12 +10,88 @@ import re
 from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
-from Guffy.core.database import Job
+from Guffy.core.database import Job, JobOutlet
+
+
+def normalize_company(company: str) -> str:
+    """Normalizes company name by removing legal identifiers and extra whitespace."""
+    if not company:
+        return ""
+    c = company.strip().lower()
+    c = re.sub(r"\b(inc|incorporated|llc|corp|corporation|ltd|limited|co|company|gmbh|sa|pvt)\b[\.]?", "", c)
+    c = re.sub(r"[^\w\s]", "", c)
+    return " ".join(c.split())
+
+
+def normalize_title(title: str) -> str:
+    """Normalizes job title by stripping bracketed qualifiers, remote tags, and punctuation."""
+    if not title:
+        return ""
+    t = title.strip().lower()
+    t = re.sub(r"\[.*?\]|\(.*?\)", "", t)  # strip bracketed notes e.g. [Remote], (US only)
+    t = re.sub(r"\b(remote|hybrid|onsite|full-time|part-time|contract|urgent|urgently hiring)\b", "", t)
+    t = re.sub(r"[^\w\s]", " ", t)
+    return " ".join(t.split())
+
+
+def compute_canonical_id(company: str, title: str) -> str:
+    """Computes a deterministic canonical fingerprint for cross-source grouping."""
+    c = normalize_company(company)
+    t = normalize_title(title)
+    raw = f"{c}:{t}".strip()
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:16]
+
+
+def get_outlet_directness_score(portal: str, easy_apply: bool = False) -> int:
+    """
+    Computes a directness score (0-100) indicating closeness to the hiring recruiter:
+    100 = Official Company ATS (Greenhouse, Lever, Ashby, Workday, SmartRecruiters)
+     80 = Direct 1-Click / Easy Apply (LinkedIn Easy Apply, Wellfound startup direct)
+     60 = Standard Job Board (Indeed, LinkedIn Standard, Glassdoor, Dice)
+     40 = Third-Party Remote Aggregators (RemoteOK, WeWorkRemotely, YC Work at a Startup)
+    """
+    p = (portal or "").lower()
+    if p in ("company_ats", "greenhouse", "lever", "ashby", "workday", "smartrecruiters", "direct"):
+        return 100
+    if easy_apply or p == "wellfound":
+        return 80
+    if p in ("linkedin", "indeed", "glassdoor", "dice"):
+        return 60
+    return 40
+
+
+def get_outlet_badge_and_label(portal: str, directness_score: int) -> Dict[str, str]:
+    """Returns human-friendly route descriptor and recommendation rationale."""
+    if directness_score >= 100:
+        return {
+            "tier": "direct_ats",
+            "label": "Direct to Recruiter (Official ATS)",
+            "rationale": "Direct submission into employer ATS without aggregator latency or middlemen.",
+        }
+    elif directness_score >= 80:
+        return {
+            "tier": "direct_apply",
+            "label": "Direct / Easy Apply",
+            "rationale": "High visibility direct submission or 1-click startup outreach.",
+        }
+    elif directness_score >= 60:
+        return {
+            "tier": "job_board",
+            "label": "Standard Job Board Listing",
+            "rationale": "Public listing on high-volume board.",
+        }
+    else:
+        return {
+            "tier": "aggregator",
+            "label": "Syndicated Aggregator",
+            "rationale": "Syndicated remote tech aggregator.",
+        }
 
 
 class JobPosting(BaseModel):
     """Normalized schema representing a discovered job across any search source."""
     id: str = ""
+    canonical_id: str = ""
     title: str
     company: str
     location: str = "Remote"
@@ -29,15 +105,19 @@ class JobPosting(BaseModel):
     posted_at: Optional[datetime] = None
 
     def model_post_init(self, __context: Any) -> None:
-        """Generates deterministic unique ID from portal and job_url if not provided."""
+        """Generates deterministic unique ID and canonical ID."""
         if not self.id:
             raw = f"{self.portal}:{self.job_url.strip()}".lower()
             self.id = hashlib.sha256(raw.encode("utf-8")).hexdigest()[:16]
+        if not self.canonical_id:
+            self.canonical_id = compute_canonical_id(self.company, self.title)
 
     def to_job_model(self) -> Job:
         """Converts JobPosting schema into an instance of SQLAlchemy Job model."""
         return Job(
             id=self.id,
+            canonical_id=self.canonical_id,
+            is_canonical_primary=True,
             title=self.title.strip(),
             company=self.company.strip(),
             location=self.location.strip() or "Remote",

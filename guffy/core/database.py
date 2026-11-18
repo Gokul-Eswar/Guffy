@@ -43,6 +43,10 @@ class Job(Base):
     missing_skills = Column(Text, default="")
     pros_cons = Column(Text, default="")
     
+    # Deduplication & Canonical grouping (Ticket 13)
+    canonical_id = Column(String(64), nullable=True, index=True)
+    is_canonical_primary = Column(Boolean, default=True)
+
     # Lifecycle Status: discovered, scored, staged, applied, rejected, interviewing
     status = Column(String(32), default="discovered", index=True)
     discovered_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
@@ -50,6 +54,23 @@ class Job(Base):
 
     # Relationship to application log
     application = relationship("Application", back_populates="job", uselist=False, cascade="all, delete-orphan")
+    # Outlets representing other sources for this job
+    outlets = relationship("JobOutlet", back_populates="job", cascade="all, delete-orphan")
+
+
+class JobOutlet(Base):
+    """Represents an outlet/source where a job posting is listed."""
+    __tablename__ = "job_outlets"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    job_id = Column(String(64), ForeignKey("jobs.id", ondelete="CASCADE"), nullable=False, index=True)
+    portal = Column(String(64), nullable=False)
+    job_url = Column(Text, nullable=False)
+    easy_apply = Column(Boolean, default=False)
+    directness_score = Column(Integer, default=50)  # 100 = Direct ATS, 80 = Direct Easy Apply, 60 = Board, 40 = Aggregator
+    discovered_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+    job = relationship("Job", back_populates="outlets")
 
 
 class Company(Base):
