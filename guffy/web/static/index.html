@@ -517,6 +517,19 @@
         </div>
 
         <!-- Application Review Section (If Staged) -->
+        <!-- Outlets & Direct Route Recommender Section (Ticket 13) -->
+        <div id="modal-outlets-section" class="space-y-2 border-t border-slate-800 pt-3">
+          <div class="flex items-center justify-between">
+            <h4 class="font-semibold text-indigo-400 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+              <i class="fa-solid fa-layer-group"></i> Multi-Source Outlets & Routes
+            </h4>
+            <span id="modal-outlets-count" class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 font-mono"></span>
+          </div>
+          <div id="modal-outlets-list" class="space-y-2 text-xs">
+            <!-- Dynamically populated outlet cards -->
+          </div>
+        </div>
+
         <div id="modal-staged-assets-section" class="space-y-4 hidden border-t border-slate-800 pt-4">
           <h4 class="font-semibold text-amber-400 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
             <i class="fa-solid fa-envelope-open-text"></i> Tailored Application Assets

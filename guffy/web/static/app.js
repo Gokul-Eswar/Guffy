@@ -213,14 +213,28 @@ function renderJobsTable() {
       rejected: 'bg-rose-500/10 text-rose-400 border-rose-500/20'
     }[job.status] || 'bg-slate-800 text-slate-400 border-slate-700';
 
+    const multiOutletBadge = (job.outlets_count > 1) ? `
+      <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-medium cursor-pointer" onclick="openJobDetailModal('${job.id}')" title="${job.outlets_count} sources available">
+        <i class="fa-solid fa-layer-group text-[9px]"></i> ${job.outlets_count} outlets
+      </span>
+    ` : '';
+
     return `
       <tr class="hover:bg-slate-800/40 transition">
         <td class="py-3 px-4">
-          <div class="font-semibold text-slate-100 hover:text-indigo-400 cursor-pointer" onclick="openJobDetailModal('${job.id}')">${escapeHtml(job.title)}</div>
+          <div class="flex items-center gap-2">
+            <span class="font-semibold text-slate-100 hover:text-indigo-400 cursor-pointer" onclick="openJobDetailModal('${job.id}')">${escapeHtml(job.title)}</span>
+            ${multiOutletBadge}
+          </div>
           <div class="text-[11px] text-slate-400">${escapeHtml(job.company)}</div>
         </td>
         <td class="py-3 px-4">
-          <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-medium text-[11px] uppercase">${escapeHtml(job.portal)}</span>
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-medium text-[11px] uppercase">${escapeHtml(job.portal)}</span>
+            ${job.recommended_outlet && job.recommended_outlet.tier === 'direct_ats' ? `
+              <span class="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[9px] font-semibold" title="Direct ATS route available">ATS ⭐</span>
+            ` : ''}
+          </div>
         </td>
         <td class="py-3 px-4 text-slate-400">
           <i class="fa-solid fa-location-dot text-[10px] mr-1 text-slate-500"></i>${escapeHtml(job.location || 'Remote')}
@@ -315,6 +329,44 @@ async function openJobDetailModal(jobId) {
       ${pros.map(p => `<div class="text-emerald-400 flex items-center gap-1.5"><i class="fa-solid fa-check text-[10px]"></i> ${escapeHtml(p)}</div>`).join('')}
       ${cons.map(c => `<div class="text-rose-400 flex items-center gap-1.5"><i class="fa-solid fa-xmark text-[10px]"></i> ${escapeHtml(c)}</div>`).join('')}
     `;
+
+    // Multi-source Outlets & Direct Route Recommender (Ticket 13)
+    const outlets = job.outlets || [];
+    document.getElementById('modal-outlets-count').textContent = `${outlets.length} source${outlets.length === 1 ? '' : 's'}`;
+    const outletsListEl = document.getElementById('modal-outlets-list');
+
+    // Sort outlets descending by directness
+    const sortedOutlets = [...outlets].sort((a, b) => (b.directness_score || 0) - (a.directness_score || 0));
+    const highestScore = sortedOutlets.length ? sortedOutlets[0].directness_score : 0;
+
+    outletsListEl.innerHTML = sortedOutlets.map((outlet, idx) => {
+      const isTopPick = (outlet.directness_score === highestScore && highestScore >= 80);
+      const tierBadgeColor = {
+        direct_ats: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+        direct_apply: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
+        job_board: 'bg-sky-500/20 text-sky-300 border-sky-500/30',
+        aggregator: 'bg-slate-700/50 text-slate-300 border-slate-600',
+      }[outlet.tier] || 'bg-slate-700 text-slate-300 border-slate-600';
+
+      return `
+        <div class="p-2.5 rounded-xl border ${isTopPick ? 'border-emerald-500/40 bg-emerald-950/20' : 'border-slate-800 bg-slate-950'} flex items-center justify-between gap-3">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${tierBadgeColor}">${escapeHtml(outlet.portal)}</span>
+              ${isTopPick ? '<span class="text-[10px] text-emerald-400 font-semibold flex items-center gap-1"><i class="fa-solid fa-star text-[9px]"></i> Recommended Route</span>' : ''}
+              ${outlet.easy_apply ? '<span class="text-[10px] text-indigo-400 font-medium">⚡ Easy Apply</span>' : ''}
+            </div>
+            <div class="text-[11px] text-slate-300 font-medium">${escapeHtml(outlet.label || '')}</div>
+            <div class="text-[10px] text-slate-400">${escapeHtml(outlet.rationale || '')}</div>
+          </div>
+          <div class="flex items-center gap-2">
+            <a href="${escapeHtml(outlet.job_url)}" target="_blank" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[11px] font-medium flex items-center gap-1" title="Open Link">
+              <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> View
+            </a>
+          </div>
+        </div>
+      `;
+    }).join('');
 
     // Staged Assets
     const stagedSection = document.getElementById('modal-staged-assets-section');
