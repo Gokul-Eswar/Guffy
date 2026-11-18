@@ -521,12 +521,22 @@ def run_match(
 @app.post("/api/stage/{job_id}")
 def stage_job(
     job_id: str,
+    outlet_id: Optional[int] = Query(None, description="Optional specific outlet ID to stage with"),
     db: Session = Depends(get_db),
 ):
     """Stage an application with pre-filled fields and tailored assets for human review."""
     job = db.query(Job).filter_by(id=job_id).first()
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
+
+    # If the user selected a specific outlet, temporarily or persistently point staging to that portal/URL
+    if outlet_id is not None:
+        outlet = db.query(JobOutlet).filter_by(id=outlet_id, job_id=job.id).first()
+        if outlet:
+            job.portal = outlet.portal
+            job.job_url = outlet.job_url
+            job.easy_apply = outlet.easy_apply
+            db.commit()
 
     profile = get_current_profile()
     browser = BrowserController()

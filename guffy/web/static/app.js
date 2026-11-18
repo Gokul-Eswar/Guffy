@@ -363,6 +363,11 @@ async function openJobDetailModal(jobId) {
             <a href="${escapeHtml(outlet.job_url)}" target="_blank" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[11px] font-medium flex items-center gap-1" title="Open Link">
               <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> View
             </a>
+            ${job.status !== 'staged' && job.status !== 'submitted' ? `
+              <button onclick="stageSingleJob('${job.id}', ${outlet.id || 'null'})" class="px-2.5 py-1.5 rounded-lg ${isTopPick ? 'bg-emerald-600 hover:bg-emerald-500' : 'bg-indigo-600 hover:bg-indigo-500'} text-white text-[11px] font-semibold flex items-center gap-1" title="Stage & Auto-fill using this outlet">
+                <i class="fa-solid fa-paper-plane text-[10px]"></i> Apply Here
+              </button>
+            ` : ''}
           </div>
         </div>
       `;
@@ -411,10 +416,11 @@ function closeJobDetailModal() {
 }
 
 // --- STAGING & HITL APPROVAL ---
-async function stageSingleJob(jobId) {
+async function stageSingleJob(jobId, outletId = null) {
   showToast(`Staging application for job ${jobId}...`, 'info');
   try {
-    const res = await fetch(`/api/stage/${jobId}`, { method: 'POST' });
+    const url = outletId ? `/api/stage/${jobId}?outlet_id=${outletId}` : `/api/stage/${jobId}`;
+    const res = await fetch(url, { method: 'POST' });
     const data = await res.json();
     if (res.ok && data.success) {
       showToast('Application successfully staged for review!', 'success');
