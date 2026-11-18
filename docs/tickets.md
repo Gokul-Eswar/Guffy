@@ -27,6 +27,9 @@ flowchart TD
         T9 --> T10
         T10 --> T11["Ticket 11: Web Dashboard (Tailwind SPA)"]
         T11 --> T12["Ticket 12: CLI Suite & End-to-End Verification"]
+        T7 --> T13["Ticket 13: Cross-Source Job Deduplication & Direct Route Recommender"]
+        T10 --> T13
+        T11 --> T13
     end
 ```
 
@@ -48,6 +51,7 @@ flowchart TD
 | **Ticket 10** | FastAPI Backend & REST API | ✅ Completed | `tests/test_api.py` (11 passed) |
 | **Ticket 11** | Modern Web Dashboard UI (Tailwind SPA) | ✅ Completed | `tests/test_dashboard.py` (3 passed) |
 | **Ticket 12** | Unified CLI Suite & End-to-End Verification | ✅ Completed | `tests/test_e2e.py` (7 passed) |
+| **Ticket 13** | Cross-Source Job Deduplication & Direct Route Recommender | ✅ Completed | `tests/test_deduplication.py` (5 passed) |
 
 ---
 
@@ -203,3 +207,23 @@ flowchart TD
     - `guffy serve`: FastAPI REST API and Tailwind CSS SPA dashboard server launcher.
   - `tests/test_e2e.py`: 7 comprehensive End-to-End system verification tests covering CLI parser definitions, workspace setup, discovery ingestion, semantic fit scoring, and review queue handling.
   - `README.md`: Complete documentation covering architectural workflow, features, CLI commands, web dashboard guide, API reference, and installation instructions.
+
+---
+
+### ✅ [Ticket 13] Cross-Source Job Deduplication & Direct Route Recommender
+- **Goal**: Consolidate identical job postings from multiple sources (Direct ATS, LinkedIn, Indeed, RemoteOK, etc.) under a unified canonical listing, display all available application outlets, and advise the candidate on the closest/most direct route to apply.
+- **Deliverables**:
+  - `guffy/core/database.py`:
+    - Added `canonical_id` index and `is_canonical_primary` on `Job`.
+    - Added `JobOutlet` model tracking `job_id`, `portal`, `job_url`, `directness_score`, `easy_apply`, and discovery timestamp.
+  - `guffy/searchers/base.py`:
+    - Title & company normalization engine (`normalize_company`, `normalize_title`, `compute_canonical_id`).
+    - Directness scoring hierarchy: Direct Company ATS (Rank 100) > Direct Easy Apply (Rank 80) > Job Boards (Rank 60) > Syndicated Aggregators (Rank 40).
+    - `save_or_link_posting` algorithm linking duplicate postings as alternate outlets and auto-upgrading primary posting attributes to the highest-directness source.
+  - Ingestion updates in `guffy/cli.py`, `guffy/searchers/company_crawler.py`, and `guffy/web/app.py`:
+    - Connected discovery pipelines to `save_or_link_posting`.
+  - `guffy/web/app.py`:
+    - Exposed outlets array, outlets count, and `recommended_outlet` in `/api/jobs` and `/api/jobs/{id}`.
+  - `guffy/web/static/index.html` & `app.js`:
+    - Multi-outlet badges on job cards and an interactive outlet picker dialog showing the direct route recommendation with one-click application choice.
+  - `tests/test_deduplication.py`: 5 comprehensive unit & API integration tests covering normalization, multi-outlet linking, directness ranking, and API serialization (5 passed).

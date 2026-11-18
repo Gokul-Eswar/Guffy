@@ -30,6 +30,9 @@ flowchart TD
         T9 --> T10
         T10 --> T11["Ticket 11: Web Dashboard (Tailwind SPA)"]
         T11 --> T12["Ticket 12: CLI Suite & End-to-End Verification"]
+        T7 --> T13["Ticket 13: Cross-Source Job Deduplication & Direct Route Recommender"]
+        T10 --> T13
+        T11 --> T13
     end
 ```
 
@@ -222,6 +225,30 @@ flowchart TD
     - End-to-end workflow test: init -> profile load -> search/crawl -> match score -> stage application -> review.
   - `[NEW] README.md`: Complete setup and user guide.
 - **Verification**: Run `pytest tests/test_e2e.py` and execute CLI commands.
+
+---
+
+### [Ticket 13] Cross-Source Job Deduplication & Direct Route Recommender
+**Goal**: Identify identical jobs posted across multiple sources (direct ATS, LinkedIn, Indeed, RemoteOK, etc.), group them under a single canonical job card with all available application outlets, and advise the user on the closest and most direct route (e.g. Official ATS over 3rd-party aggregators).
+- **Components & Files**:
+  - `[MODIFIED] guffy/core/database.py`:
+    - Add `canonical_id` (indexed hash of normalized company + job title) to the `Job` model.
+    - Add `JobOutlet` model (or structured outlet relationships) capturing portal, specific job URL, directness score, easy-apply availability, and discovery timestamp.
+  - `[MODIFIED] guffy/searchers/base.py`:
+    - Add canonical company & title normalization helper (`compute_canonical_id`).
+    - Add outlet priority scoring ranking direct ATS (Ashby/Greenhouse/Lever) > Direct Easy Apply (LinkedIn/Wellfound) > Standard Job Boards > Aggregators.
+  - `[MODIFIED] guffy/cli.py` & `guffy/searchers/company_crawler.py`:
+    - Ingestion pipeline update: when a job matches an existing `canonical_id`, link it as an alternate outlet rather than creating duplicate independent job records.
+  - `[MODIFIED] guffy/web/app.py`:
+    - Update `/api/jobs` responses to bundle grouped outlets and designate the "recommended direct route".
+  - `[MODIFIED] guffy/web/static/index.html` & `guffy/web/static/app.js`:
+    - Display multi-source badge on job cards (e.g. *"Available on 3 portals: Greenhouse, LinkedIn, Indeed"*).
+    - Provide an Outlet Selection dialog/dropdown showing all outlets, highlighting the **Recommended Route** with rationale (e.g. *"Direct to Recruiter: Official Greenhouse ATS"*), and letting the user choose which outlet to stage/apply with.
+  - `[NEW] tests/test_deduplication.py`:
+    - Unit tests for canonical hash generation and title/company normalization.
+    - Test multi-outlet grouping across diverse mock job inputs.
+    - Test directness ranking logic and outlet recommendation.
+- **Verification**: Run `pytest tests/test_deduplication.py` and verify multi-outlet presentation on web dashboard.
 
 ---
 
